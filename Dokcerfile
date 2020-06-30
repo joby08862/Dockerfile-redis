@@ -1,0 +1,27 @@
+FROM ubuntu:16.04
+#VOLUME "/data"
+RUN mkdir -p /data/data/ && mkdir -p /data/log/
+#RUN mv /etc/localtime /etc/localtime.bak && \
+#    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
+COPY ./sources.list /etc/apt/
+RUN apt-get update
+WORKDIR /root
+RUN mkdir redis
+WORKDIR /root/redis
+#RUN apt-get install software-properties-common -y
+RUN apt-get update
+RUN apt-get install libc6 -y
+#RUN apt-get install libc-dev-bi -y
+RUN apt-get install -y wget
+RUN apt-get install gcc -y
+RUN apt-get install libc6-dev -y
+RUN apt-get install --reinstall make
+RUN wget http://download.redis.io/releases/redis-3.2.8.tar.gz
+RUN tar xvzf redis-3.2.8.tar.gz
+WORKDIR ./redis-3.2.8 
+RUN make
+RUN make install
+COPY ./redis.conf /etc/
+EXPOSE 6379
+ENTRYPOINT ["redis-server","/etc/redis.conf"]
